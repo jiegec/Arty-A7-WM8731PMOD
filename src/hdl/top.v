@@ -5,6 +5,10 @@ module top(
 	input wire clk,
 	input wire rst,
 
+	// uart
+	input wire uart_rx,
+	output wire uart_tx,
+
 	output wire speaker_mute,
 	// mclk = clk = 12.288MHz
 	output wire mclk,

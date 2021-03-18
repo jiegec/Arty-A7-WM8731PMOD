@@ -15,3 +15,7 @@ set_property -dict {PACKAGE_PIN D13 IOSTANDARD LVCMOS33} [get_ports speaker_mute
 set_property -dict {PACKAGE_PIN B18 IOSTANDARD LVCMOS33} [get_ports mclk]
 set_property -dict {PACKAGE_PIN A18 IOSTANDARD LVCMOS33} [get_ports i2c_scl]
 set_property -dict {PACKAGE_PIN K16 IOSTANDARD LVCMOS33} [get_ports i2c_sda]
+
+# Serial
+set_property -dict {PACKAGE_PIN D10 IOSTANDARD LVCMOS33} [get_ports uart_tx]
+set_property -dict {PACKAGE_PIN A9 IOSTANDARD LVCMOS33} [get_ports uart_rx]

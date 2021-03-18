@@ -233,6 +233,8 @@ proc create_root_design { parentCell } {
   set mclk [ create_bd_port -dir O mclk ]
   set resetn [ create_bd_port -dir I -type rst resetn ]
   set speaker_mute [ create_bd_port -dir O speaker_mute ]
+  set uart_rx [ create_bd_port -dir I uart_rx ]
+  set uart_tx [ create_bd_port -dir O uart_tx ]
 
   # Create instance: clk_wiz, and set properties
   set clk_wiz [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 clk_wiz ]
@@ -279,6 +281,8 @@ proc create_root_design { parentCell } {
   connect_bd_net -net top_0_i2s_lrclk [get_bd_ports i2s_lrclk] [get_bd_pins top_0/i2s_lrclk]
   connect_bd_net -net top_0_mclk [get_bd_ports mclk] [get_bd_pins top_0/mclk]
   connect_bd_net -net top_0_speaker_mute [get_bd_ports speaker_mute] [get_bd_pins top_0/speaker_mute]
+  connect_bd_net -net top_0_uart_tx [get_bd_ports uart_tx] [get_bd_pins top_0/uart_tx]
+  connect_bd_net -net uart_rx_0_1 [get_bd_ports uart_rx] [get_bd_pins top_0/uart_rx]
   connect_bd_net -net xlconstant_0_dout [get_bd_pins clk_wiz/reset] [get_bd_pins xlconstant_0/dout]
 
   # Create address segments
