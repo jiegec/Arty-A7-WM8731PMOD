@@ -131,6 +131,7 @@ set bCheckIPs 1
 if { $bCheckIPs == 1 } {
    set list_check_ips "\ 
 xilinx.com:ip:clk_wiz:6.0\
+xilinx.com:ip:ila:6.2\
 xilinx.com:ip:proc_sys_reset:5.0\
 xilinx.com:ip:xlconstant:1.1\
 "
@@ -247,6 +248,14 @@ proc create_root_design { parentCell } {
    CONFIG.MMCM_DIVCLK_DIVIDE {5} \
  ] $clk_wiz
 
+  # Create instance: ila_0, and set properties
+  set ila_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:ila:6.2 ila_0 ]
+  set_property -dict [ list \
+   CONFIG.C_ENABLE_ILA_AXI_MON {false} \
+   CONFIG.C_MONITOR_TYPE {Native} \
+   CONFIG.C_NUM_OF_PROBES {8} \
+ ] $ila_0
+
   # Create instance: rst_clk_wiz_100M, and set properties
   set rst_clk_wiz_100M [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_clk_wiz_100M ]
 
@@ -269,20 +278,20 @@ proc create_root_design { parentCell } {
 
   # Create port connections
   connect_bd_net -net clk_in1_0_1 [get_bd_ports clk_in] [get_bd_pins clk_wiz/clk_in1]
-  connect_bd_net -net clk_wiz_clk_out1 [get_bd_pins clk_wiz/clk_out1] [get_bd_pins rst_clk_wiz_100M/slowest_sync_clk] [get_bd_pins top_0/clk]
+  connect_bd_net -net clk_wiz_clk_out1 [get_bd_pins clk_wiz/clk_out1] [get_bd_pins ila_0/clk] [get_bd_pins rst_clk_wiz_100M/slowest_sync_clk] [get_bd_pins top_0/clk]
   connect_bd_net -net clk_wiz_locked [get_bd_pins clk_wiz/locked] [get_bd_pins rst_clk_wiz_100M/dcm_locked]
   connect_bd_net -net ext_reset_in_0_1 [get_bd_ports resetn] [get_bd_pins rst_clk_wiz_100M/ext_reset_in]
-  connect_bd_net -net i2s_adcdat_0_1 [get_bd_ports i2s_adcdat] [get_bd_pins top_0/i2s_adcdat]
+  connect_bd_net -net i2s_adcdat_0_1 [get_bd_ports i2s_adcdat] [get_bd_pins ila_0/probe4] [get_bd_pins top_0/i2s_adcdat]
   connect_bd_net -net rst_clk_wiz_100M_peripheral_aresetn [get_bd_pins rst_clk_wiz_100M/peripheral_aresetn] [get_bd_pins top_0/rst]
-  connect_bd_net -net top_0_i2c_scl [get_bd_ports i2c_scl] [get_bd_pins top_0/i2c_scl]
-  connect_bd_net -net top_0_i2c_sda [get_bd_ports i2c_sda] [get_bd_pins top_0/i2c_sda]
-  connect_bd_net -net top_0_i2s_bclk [get_bd_ports i2s_bclk] [get_bd_pins top_0/i2s_bclk]
-  connect_bd_net -net top_0_i2s_dacdat [get_bd_ports i2s_dacdat] [get_bd_pins top_0/i2s_dacdat]
-  connect_bd_net -net top_0_i2s_lrclk [get_bd_ports i2s_lrclk] [get_bd_pins top_0/i2s_lrclk]
+  connect_bd_net -net top_0_i2c_scl [get_bd_ports i2c_scl] [get_bd_pins ila_0/probe0] [get_bd_pins top_0/i2c_scl]
+  connect_bd_net -net top_0_i2c_sda [get_bd_ports i2c_sda] [get_bd_pins ila_0/probe1] [get_bd_pins top_0/i2c_sda]
+  connect_bd_net -net top_0_i2s_bclk [get_bd_ports i2s_bclk] [get_bd_pins ila_0/probe7] [get_bd_pins top_0/i2s_bclk]
+  connect_bd_net -net top_0_i2s_dacdat [get_bd_ports i2s_dacdat] [get_bd_pins ila_0/probe5] [get_bd_pins top_0/i2s_dacdat]
+  connect_bd_net -net top_0_i2s_lrclk [get_bd_ports i2s_lrclk] [get_bd_pins ila_0/probe6] [get_bd_pins top_0/i2s_lrclk]
   connect_bd_net -net top_0_mclk [get_bd_ports mclk] [get_bd_pins top_0/mclk]
   connect_bd_net -net top_0_speaker_mute [get_bd_ports speaker_mute] [get_bd_pins top_0/speaker_mute]
-  connect_bd_net -net top_0_uart_tx [get_bd_ports uart_tx] [get_bd_pins top_0/uart_tx]
-  connect_bd_net -net uart_rx_0_1 [get_bd_ports uart_rx] [get_bd_pins top_0/uart_rx]
+  connect_bd_net -net top_0_uart_tx [get_bd_ports uart_tx] [get_bd_pins ila_0/probe2] [get_bd_pins top_0/uart_tx]
+  connect_bd_net -net uart_rx_0_1 [get_bd_ports uart_rx] [get_bd_pins ila_0/probe3] [get_bd_pins top_0/uart_rx]
   connect_bd_net -net xlconstant_0_dout [get_bd_pins clk_wiz/reset] [get_bd_pins xlconstant_0/dout]
 
   # Create address segments
