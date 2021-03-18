@@ -133,6 +133,7 @@ if { $bCheckIPs == 1 } {
 xilinx.com:ip:clk_wiz:6.0\
 xilinx.com:ip:ila:6.2\
 xilinx.com:ip:proc_sys_reset:5.0\
+xilinx.com:ip:system_ila:1.1\
 xilinx.com:ip:xlconstant:1.1\
 "
 
@@ -240,12 +241,12 @@ proc create_root_design { parentCell } {
   # Create instance: clk_wiz, and set properties
   set clk_wiz [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 clk_wiz ]
   set_property -dict [ list \
-   CONFIG.CLKOUT1_JITTER {360.948} \
-   CONFIG.CLKOUT1_PHASE_ERROR {301.601} \
-   CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {12.288} \
-   CONFIG.MMCM_CLKFBOUT_MULT_F {48.000} \
-   CONFIG.MMCM_CLKOUT0_DIVIDE_F {78.125} \
-   CONFIG.MMCM_DIVCLK_DIVIDE {5} \
+   CONFIG.CLKOUT1_JITTER {328.461} \
+   CONFIG.CLKOUT1_PHASE_ERROR {378.726} \
+   CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {73.728} \
+   CONFIG.MMCM_CLKFBOUT_MULT_F {50.875} \
+   CONFIG.MMCM_CLKOUT0_DIVIDE_F {11.500} \
+   CONFIG.MMCM_DIVCLK_DIVIDE {6} \
  ] $clk_wiz
 
   # Create instance: ila_0, and set properties
@@ -258,6 +259,13 @@ proc create_root_design { parentCell } {
 
   # Create instance: rst_clk_wiz_100M, and set properties
   set rst_clk_wiz_100M [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_clk_wiz_100M ]
+
+  # Create instance: system_ila_0, and set properties
+  set system_ila_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:system_ila:1.1 system_ila_0 ]
+  set_property -dict [ list \
+   CONFIG.C_BRAM_CNT {6} \
+   CONFIG.C_SLOT_0_INTF_TYPE {xilinx.com:interface:iic_rtl:1.0} \
+ ] $system_ila_0
 
   # Create instance: top_0, and set properties
   set block_name top
@@ -278,10 +286,11 @@ proc create_root_design { parentCell } {
 
   # Create interface connections
   connect_bd_intf_net -intf_net top_0_IIC [get_bd_intf_ports i2c] [get_bd_intf_pins top_0/IIC]
+connect_bd_intf_net -intf_net [get_bd_intf_nets top_0_IIC] [get_bd_intf_ports i2c] [get_bd_intf_pins system_ila_0/SLOT_0_IIC]
 
   # Create port connections
   connect_bd_net -net clk_in1_0_1 [get_bd_ports clk_in] [get_bd_pins clk_wiz/clk_in1]
-  connect_bd_net -net clk_wiz_clk_out1 [get_bd_pins clk_wiz/clk_out1] [get_bd_pins ila_0/clk] [get_bd_pins rst_clk_wiz_100M/slowest_sync_clk] [get_bd_pins top_0/clk]
+  connect_bd_net -net clk_wiz_clk_out1 [get_bd_pins clk_wiz/clk_out1] [get_bd_pins ila_0/clk] [get_bd_pins rst_clk_wiz_100M/slowest_sync_clk] [get_bd_pins system_ila_0/clk] [get_bd_pins top_0/clk]
   connect_bd_net -net clk_wiz_locked [get_bd_pins clk_wiz/locked] [get_bd_pins rst_clk_wiz_100M/dcm_locked]
   connect_bd_net -net ext_reset_in_0_1 [get_bd_ports resetn] [get_bd_pins rst_clk_wiz_100M/ext_reset_in]
   connect_bd_net -net i2s_adcdat_0_1 [get_bd_ports i2s_adcdat] [get_bd_pins ila_0/probe2] [get_bd_pins top_0/i2s_adcdat]
@@ -301,7 +310,6 @@ proc create_root_design { parentCell } {
   # Restore current instance
   current_bd_instance $oldCurInst
 
-  validate_bd_design
   save_bd_design
 }
 # End of create_root_design()
@@ -313,4 +321,6 @@ proc create_root_design { parentCell } {
 
 create_root_design ""
 
+
+common::send_msg_id "BD_TCL-1000" "WARNING" "This Tcl script was generated from a block design that has not been validated. It is possible that design <$design_name> may result in errors during validation."
 
