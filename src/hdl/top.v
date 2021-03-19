@@ -70,20 +70,25 @@ module top(
 
     // I2C registers to write
     // 8 bit i2c address + 7 bit reg addres + 9 bit data
-    localparam NUM_I2C_ASSIGNMENTS = 5;
+    localparam NUM_I2C_ASSIGNMENTS = 7;
     reg [8+16-1:0] i2c_assignments [0:NUM_I2C_ASSIGNMENTS-1];
     localparam I2C_ADDRESS = 8'b00110100;
     initial begin
+        // Power up sequence at Page 61
         // Reset device
-        i2c_assignments[0] = {I2C_ADDRESS, 7'b0001111, 9'b00000000};
-        // Power on everything
-        i2c_assignments[1] = {I2C_ADDRESS, 7'b0000110, 9'b00000000};
+        i2c_assignments[0] = {I2C_ADDRESS, 7'b0001111, 9'b0_0000_0000};
+        // Power on required bits except OUTPD
+        i2c_assignments[1] = {I2C_ADDRESS, 7'b0000110, 9'b0_0111_0000};
+        // Disable mic mute and bypass, select mic input and dac
+        i2c_assignments[2] = {I2C_ADDRESS, 7'b0000100, 9'b0_0001_0100};
+        // Disable mute for left and right line in with default volume
+        i2c_assignments[3] = {I2C_ADDRESS, 7'b0000001, 9'b1_0001_0111};
+        // Disable soft mute for dac
+        i2c_assignments[4] = {I2C_ADDRESS, 7'b0000101, 9'b0_0000_0000};
         // Activate interface
-        i2c_assignments[2] = {I2C_ADDRESS, 7'b0001001, 9'b00000001};
-        // Input from mic
-        i2c_assignments[3] = {I2C_ADDRESS, 7'b0000100, 9'b00001000};
-        // Disable mute for left and right with default volume
-        i2c_assignments[4] = {I2C_ADDRESS, 7'b0000001, 9'b110010111};
+        i2c_assignments[5] = {I2C_ADDRESS, 7'b0001001, 9'b0_0000_0001};
+        // Power on OUTPD
+        i2c_assignments[6] = {I2C_ADDRESS, 7'b0000110, 9'b0_0110_0000};
     end
 
     reg [7:0] i2c_assignment_index;
@@ -130,22 +135,24 @@ module top(
                     I2C_STATE_RESET: begin
                         i2c_sda_reg <= 1'b0;
                         i2c_state <= I2C_STATE_START1;
+                        i2c_bit_index <= 8'd23;
                     end
                     I2C_STATE_START1: begin
                         i2c_scl_reg <= 1'b0;
                         i2c_state <= I2C_STATE_WRITE;
-                        i2c_bit_index <= 8'd23;
+                        i2c_sda_reg <= i2c_assignments[i2c_assignment_index][i2c_bit_index];
+                        i2c_bit_index <= i2c_bit_index - 8'b1;
                     end
                     I2C_STATE_WRITE: begin
-                        if (i2c_scl_reg == 1'b0) begin
-                            // scl rise
-                            i2c_sda_t_reg <= 1'b0;
+                        if (i2c_scl_reg == 1'b1) begin
+                            // scl fall
                             if (i2c_prev_state == I2C_STATE_WRITE && (i2c_bit_index == 8'd15 || i2c_bit_index == 8'd7 || i2c_bit_index == 8'hff)) begin
                                 // 8 bits sent
                                 i2c_state <= I2C_STATE_READ_ACK;
                                 i2c_sda_t_reg <= 1'b1;
                                 i2c_sda_reg <= 1'b0;
                             end else begin
+                                i2c_sda_t_reg <= 1'b0;
                                 i2c_sda_reg <= i2c_assignments[i2c_assignment_index][i2c_bit_index];
                                 i2c_bit_index <= i2c_bit_index - 8'b1;
                             end
@@ -153,8 +160,8 @@ module top(
                         i2c_scl_reg <= ~i2c_scl_reg;
                     end
                     I2C_STATE_READ_ACK: begin
-                        if (i2c_scl_reg == 1'b0) begin
-                            // scl rise
+                        if (i2c_scl_reg == 1'b1) begin
+                            // scl fall
                             if (i2c_bit_index == 8'hff) begin
                                 // last bit
                                 i2c_state <= I2C_STATE_STOP1;
@@ -166,8 +173,6 @@ module top(
                                 i2c_sda_reg <= i2c_assignments[i2c_assignment_index][i2c_bit_index];
                                 i2c_bit_index <= i2c_bit_index - 8'b1;
                             end
-                        end else begin
-                            // scl fall
                         end
                         i2c_scl_reg <= ~i2c_scl_reg;
                     end
