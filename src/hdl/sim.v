@@ -18,17 +18,8 @@ module sim(
 
     always clk = #5 ~clk;
 
-    wire [31:0] bram_addra;
-    reg [31:0] bram_douta;
-
-    always @(posedge clk) begin
-        bram_douta <= bram_addra * bram_addra * bram_addra * bram_addra;
-    end
-
-    top dut(
-        .clk(clk),
-        .rstn(~rst),
-        .bram_addra(bram_addra),
-        .bram_douta(bram_douta)
+    system_wrapper dut(
+        .clk_in(clk),
+        .resetn(~rst)
     );
 endmodule

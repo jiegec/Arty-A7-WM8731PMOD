@@ -258,7 +258,8 @@ module top(
     wire [31:0] bram_addr_shift;
     reg [31:0] bram_data;
     assign i2s_dacdat = bram_data[23];
-    assign bram_addr_shift = bram_addr[31:2];
+    // byte-addressed
+    assign bram_addr_shift = {bram_addr[31:2], 2'b0};
     assign bram_addra = bram_addr_shift;
 
     initial begin
@@ -283,7 +284,7 @@ module top(
                 if (i2s_lrclk_counter == 16'd767 && i2s_lrclk_reg == 1'b0) begin
                     // lrclk rise
                     bram_data <= bram_douta;
-                    if (bram_addra < 32'd30000 - 32'd1) begin
+                    if (bram_addr[31:2] < 32'd30000 - 32'd1) begin
                         bram_addr <= bram_addr + 32'b1;
                     end else begin
                         bram_addr <= 32'b0;
