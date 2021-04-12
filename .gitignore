@@ -51,3 +51,9 @@ hw_handoff/*
 
 # maintain required directories
 !**/.keep
+
+# custom
+!convert.sh
+!*.ogg
+!*.pcm
+!*.coe

@@ -27,14 +27,25 @@ module top(
     (* X_INTERFACE_INFO = "xilinx.com:interface:iic:1.0 IIC SDA_T" *)
     output wire i2c_sda_t,
 
-
     // lrclk = fs = 48kHz = clk/1536
     output wire i2s_lrclk,
     // 24 bit data, stereo
     // bclk = 24*2*fs = 2.304MHz = clk/32
     output wire i2s_dacdat,
     input wire i2s_adcdat,
-    output wire i2s_bclk
+    output wire i2s_bclk,
+
+    // access block ram
+    (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 BRAM ADDR" *)
+    output wire [31:0] bram_addra,
+    (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 BRAM CLK" *)
+    output wire bram_clka,
+    (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 BRAM DOUT" *)
+    input wire [31:0] bram_douta,
+    (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 BRAM EN" *)
+    output wire bram_ena,
+    (* X_INTERFACE_INFO = "xilinx.com:interface:bram:1.0 BRAM RST" *)
+    output wire bram_rsta
     );
 
     wire rst;
@@ -236,21 +247,50 @@ module top(
     end
     assign i2s_lrclk = i2s_lrclk_reg;
 
-    assign i2s_dacdat = 1'b0;
+    // bram to i2s dac
+    assign bram_rsta = 1'b0;
+    assign bram_ena = 1'b1;
+    assign bram_clka = clk;
 
     reg [7:0] i2s_bclk_counter;
     reg i2s_bclk_reg;
+    reg [31:0] bram_addr;
+    reg [31:0] bram_data;
+    assign i2s_dacdat = bram_data[23];
+    assign bram_addra = bram_addr;
 
     initial begin
         i2s_bclk_counter = 8'b0;
+        bram_addr = 32'b0;
+        bram_data = 32'b0;
     end
     always @(posedge clk) begin
         if (rst) begin
             i2s_bclk_counter <= 16'b0;
             i2s_bclk_reg <= 1'b0;
+            bram_addr <= 32'b0;
+            bram_data <= 32'b0;
         end else begin
             // divide by 32
             if (i2s_bclk_counter == 8'd15) begin
+                if (i2s_bclk_reg == 1'b1) begin
+                    // fall edge
+                    bram_data <= {bram_data[30:0], 1'b0};
+                end
+
+                if (i2s_lrclk_counter == 16'd767 && i2s_lrclk_reg == 1'b0) begin
+                    // lrclk rise
+                    bram_data <= bram_douta;
+                    if (bram_addr < 32'd12000 - 1) begin
+                        bram_addr <= bram_addr + 32'b1;
+                    end else begin
+                        bram_addr <= 32'b0;
+                    end
+                end else if (i2s_lrclk_counter == 16'd767 && i2s_lrclk_reg == 1'b1) begin
+                    // lrclk fall
+                    bram_data <= bram_douta;
+                end
+
                 i2s_bclk_reg <= ~i2s_bclk_reg;
                 i2s_bclk_counter <= 8'b0;
             end else begin

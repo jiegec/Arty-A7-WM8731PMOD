@@ -130,6 +130,7 @@ set bCheckIPsPassed 1
 set bCheckIPs 1
 if { $bCheckIPs == 1 } {
    set list_check_ips "\ 
+xilinx.com:ip:blk_mem_gen:8.4\
 xilinx.com:ip:clk_wiz:6.0\
 xilinx.com:ip:ila:6.2\
 xilinx.com:ip:proc_sys_reset:5.0\
@@ -238,6 +239,24 @@ proc create_root_design { parentCell } {
   set uart_rx [ create_bd_port -dir I uart_rx ]
   set uart_tx [ create_bd_port -dir O uart_tx ]
 
+  # Create instance: blk_mem_gen_0, and set properties
+  set blk_mem_gen_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:blk_mem_gen:8.4 blk_mem_gen_0 ]
+  set_property -dict [ list \
+   CONFIG.Byte_Size {8} \
+   CONFIG.Coe_File {../../../../../../../src/other/music.coe} \
+   CONFIG.EN_SAFETY_CKT {true} \
+   CONFIG.Enable_32bit_Address {true} \
+   CONFIG.Load_Init_File {true} \
+   CONFIG.Memory_Type {Single_Port_ROM} \
+   CONFIG.Port_A_Write_Rate {0} \
+   CONFIG.Register_PortA_Output_of_Memory_Primitives {true} \
+   CONFIG.Use_Byte_Write_Enable {false} \
+   CONFIG.Use_RSTA_Pin {true} \
+   CONFIG.Write_Depth_A {16384} \
+   CONFIG.Write_Width_A {32} \
+   CONFIG.use_bram_block {Stand_Alone} \
+ ] $blk_mem_gen_0
+
   # Create instance: clk_wiz, and set properties
   set clk_wiz [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 clk_wiz ]
   set_property -dict [ list \
@@ -285,6 +304,7 @@ proc create_root_design { parentCell } {
  ] $xlconstant_0
 
   # Create interface connections
+  connect_bd_intf_net -intf_net top_0_BRAM [get_bd_intf_pins blk_mem_gen_0/BRAM_PORTA] [get_bd_intf_pins top_0/BRAM]
   connect_bd_intf_net -intf_net top_0_IIC [get_bd_intf_ports i2c] [get_bd_intf_pins top_0/IIC]
 connect_bd_intf_net -intf_net [get_bd_intf_nets top_0_IIC] [get_bd_intf_ports i2c] [get_bd_intf_pins system_ila_0/SLOT_0_IIC]
 
@@ -294,7 +314,7 @@ connect_bd_intf_net -intf_net [get_bd_intf_nets top_0_IIC] [get_bd_intf_ports i2
   connect_bd_net -net clk_wiz_locked [get_bd_pins clk_wiz/locked] [get_bd_pins rst_clk_wiz_100M/dcm_locked]
   connect_bd_net -net ext_reset_in_0_1 [get_bd_ports resetn] [get_bd_pins rst_clk_wiz_100M/ext_reset_in]
   connect_bd_net -net i2s_adcdat_0_1 [get_bd_ports i2s_adcdat] [get_bd_pins ila_0/probe2] [get_bd_pins top_0/i2s_adcdat]
-  connect_bd_net -net rst_clk_wiz_100M_peripheral_aresetn [get_bd_pins rst_clk_wiz_100M/peripheral_aresetn] [get_bd_pins top_0/rst]
+  connect_bd_net -net rst_clk_wiz_100M_peripheral_aresetn [get_bd_pins rst_clk_wiz_100M/peripheral_aresetn] [get_bd_pins top_0/rstn]
   connect_bd_net -net top_0_i2s_bclk [get_bd_ports i2s_bclk] [get_bd_pins ila_0/probe5] [get_bd_pins top_0/i2s_bclk]
   connect_bd_net -net top_0_i2s_dacdat [get_bd_ports i2s_dacdat] [get_bd_pins ila_0/probe4] [get_bd_pins top_0/i2s_dacdat]
   connect_bd_net -net top_0_i2s_lrclk [get_bd_ports i2s_lrclk] [get_bd_pins ila_0/probe3] [get_bd_pins top_0/i2s_lrclk]
@@ -310,6 +330,7 @@ connect_bd_intf_net -intf_net [get_bd_intf_nets top_0_IIC] [get_bd_intf_ports i2
   # Restore current instance
   current_bd_instance $oldCurInst
 
+  validate_bd_design
   save_bd_design
 }
 # End of create_root_design()
@@ -321,6 +342,4 @@ connect_bd_intf_net -intf_net [get_bd_intf_nets top_0_IIC] [get_bd_intf_ports i2
 
 create_root_design ""
 
-
-common::send_msg_id "BD_TCL-1000" "WARNING" "This Tcl script was generated from a block design that has not been validated. It is possible that design <$design_name> may result in errors during validation."
 
