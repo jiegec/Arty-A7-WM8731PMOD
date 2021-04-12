@@ -252,7 +252,7 @@ proc create_root_design { parentCell } {
    CONFIG.Register_PortA_Output_of_Memory_Primitives {true} \
    CONFIG.Use_Byte_Write_Enable {false} \
    CONFIG.Use_RSTA_Pin {true} \
-   CONFIG.Write_Depth_A {16384} \
+   CONFIG.Write_Depth_A {32768} \
    CONFIG.Write_Width_A {32} \
    CONFIG.use_bram_block {Stand_Alone} \
  ] $blk_mem_gen_0
