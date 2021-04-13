@@ -113,6 +113,7 @@ module top(
     reg [7:0] i2c_scl_counter;
     reg i2c_scl_reg;
     reg i2c_sda_reg;
+    reg i2c_sda_reg_delay;
     reg i2c_sda_t_reg;
     localparam I2C_STATE_RESET = 4'd0;
     localparam I2C_STATE_START1 = 4'd1;
@@ -133,6 +134,7 @@ module top(
         i2c_prev_state = I2C_STATE_RESET;
     end
     always @(posedge clk) begin
+        i2c_sda_reg_delay <= i2c_sda_reg;
         if (rst) begin
             i2c_scl_counter <= 8'b0;
             i2c_scl_reg <= 1'b1;
@@ -226,7 +228,8 @@ module top(
     assign i2c_scl_o = i2c_scl_reg;
     assign i2c_scl_t = 1'b0;
 
-    assign i2c_sda_o = i2c_sda_reg;
+    // delay sda by one cycle to avoid timing issue
+    assign i2c_sda_o = i2c_sda_reg_delay;
     assign i2c_sda_t = i2c_sda_t_reg;
 
     reg [15:0] i2s_lrclk_counter;
