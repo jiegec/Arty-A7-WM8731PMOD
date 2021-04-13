@@ -54,7 +54,4 @@ hw_handoff/*
 
 # custom
 !convert.sh
-!*.ogg
-!*.pcm
-!*.coe
 !*.cfg
