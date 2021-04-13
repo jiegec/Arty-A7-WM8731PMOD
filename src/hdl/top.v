@@ -81,7 +81,7 @@ module top(
 
     // I2C registers to write
     // 8 bit i2c address + 7 bit reg addres + 9 bit data
-    localparam NUM_I2C_ASSIGNMENTS = 7;
+    localparam NUM_I2C_ASSIGNMENTS = 9;
     reg [8+16-1:0] i2c_assignments [0:NUM_I2C_ASSIGNMENTS-1];
     localparam I2C_ADDRESS = 8'b00110100;
     initial begin
@@ -96,10 +96,14 @@ module top(
         i2c_assignments[3] = {I2C_ADDRESS, 7'b0000001, 9'b1_0001_0111};
         // Disable soft mute for dac
         i2c_assignments[4] = {I2C_ADDRESS, 7'b0000101, 9'b0_0000_0000};
+        // Set audio format to MSB-first, left justified
+        i2c_assignments[5] = {I2C_ADDRESS, 7'b0000111, 9'b0_0000_1001};
+        // Set headphone out to -30dB
+        i2c_assignments[6] = {I2C_ADDRESS, 7'b0000010, 9'b1_1101_1011};
         // Activate interface
-        i2c_assignments[5] = {I2C_ADDRESS, 7'b0001001, 9'b0_0000_0001};
+        i2c_assignments[7] = {I2C_ADDRESS, 7'b0001001, 9'b0_0000_0001};
         // Power on OUTPD
-        i2c_assignments[6] = {I2C_ADDRESS, 7'b0000110, 9'b0_0110_0000};
+        i2c_assignments[8] = {I2C_ADDRESS, 7'b0000110, 9'b0_0110_0000};
     end
 
     reg [7:0] i2c_assignment_index;
@@ -257,7 +261,7 @@ module top(
     reg [31:0] bram_addr;
     wire [31:0] bram_addr_shift;
     reg [31:0] bram_data;
-    assign i2s_dacdat = bram_data[23];
+    assign i2s_dacdat = bram_data[31];
     // byte-addressed
     assign bram_addr_shift = {bram_addr[31:2], 2'b0};
     assign bram_addra = bram_addr_shift;
