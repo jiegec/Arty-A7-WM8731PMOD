@@ -57,3 +57,4 @@ hw_handoff/*
 !*.ogg
 !*.pcm
 !*.coe
+!*.cfg
