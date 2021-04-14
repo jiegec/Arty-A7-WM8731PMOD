@@ -17,3 +17,17 @@ set_property -dict {PACKAGE_PIN K16 IOSTANDARD LVCMOS33} [get_ports i2c_sda_io]
 # Serial
 set_property -dict {PACKAGE_PIN D10 IOSTANDARD LVCMOS33} [get_ports uart_tx]
 set_property -dict {PACKAGE_PIN A9 IOSTANDARD LVCMOS33} [get_ports uart_rx]
+
+# Switches
+set_property -dict {PACKAGE_PIN A8 IOSTANDARD LVCMOS33} [get_ports switches[0]]
+set_property -dict {PACKAGE_PIN C11 IOSTANDARD LVCMOS33} [get_ports switches[1]]
+set_property -dict {PACKAGE_PIN C10 IOSTANDARD LVCMOS33} [get_ports switches[2]]
+set_property -dict {PACKAGE_PIN A10 IOSTANDARD LVCMOS33} [get_ports switches[3]]
+
+# SPI Flash
+set_property -dict {PACKAGE_PIN L13 IOSTANDARD LVCMOS33} [get_ports spi_cs]
+set_property -dict {PACKAGE_PIN K17 IOSTANDARD LVCMOS33} [get_ports spi_dq0]
+set_property -dict {PACKAGE_PIN K18 IOSTANDARD LVCMOS33} [get_ports spi_dq1]
+set_property -dict {PACKAGE_PIN L14 IOSTANDARD LVCMOS33} [get_ports spi_dq2]
+set_property -dict {PACKAGE_PIN M14 IOSTANDARD LVCMOS33} [get_ports spi_dq3]
+set_property -dict {PACKAGE_PIN E9 IOSTANDARD LVCMOS33} [get_ports spi_sck]

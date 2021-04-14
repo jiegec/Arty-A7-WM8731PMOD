@@ -9,6 +9,17 @@ module top(
     input wire uart_rx,
     output wire uart_tx,
 
+    // switches
+    input wire [3:0] switches,
+
+    // spi flash
+    output wire spi_cs,
+    output wire spi_dq0, // sdi
+    input wire spi_dq1, // sdo
+    output wire spi_dq2, // wp
+    output wire spi_dq3, // hld
+    output wire spi_sck,
+
     output wire speaker_mute,
     // mclk = 256*fs = 12.288MHz = clk/6
     output wire mclk,
@@ -90,16 +101,16 @@ module top(
         i2c_assignments[0] = {I2C_ADDRESS, 7'b0001111, 9'b0_0000_0000};
         // Power on required bits except OUTPD
         i2c_assignments[1] = {I2C_ADDRESS, 7'b0000110, 9'b0_0111_0000};
-        // Disable mic mute and bypass, select mic input and dac
-        i2c_assignments[2] = {I2C_ADDRESS, 7'b0000100, 9'b0_0001_0100};
+        // Disable mic mute and bypass, select mic input and dac, enable mic boost
+        i2c_assignments[2] = {I2C_ADDRESS, 7'b0000100, 9'b0_0001_0101};
         // Disable mute for left and right line in with default volume
         i2c_assignments[3] = {I2C_ADDRESS, 7'b0000001, 9'b1_0001_0111};
         // Disable soft mute for dac
         i2c_assignments[4] = {I2C_ADDRESS, 7'b0000101, 9'b0_0000_0000};
         // Set audio format to MSB-first, left justified
         i2c_assignments[5] = {I2C_ADDRESS, 7'b0000111, 9'b0_0000_1001};
-        // Set headphone out to -30dB
-        i2c_assignments[6] = {I2C_ADDRESS, 7'b0000010, 9'b1_1101_1011};
+        // Set headphone out to -20dB
+        i2c_assignments[6] = {I2C_ADDRESS, 7'b0000010, 9'b1_1110_0101};
         // Activate interface
         i2c_assignments[7] = {I2C_ADDRESS, 7'b0001001, 9'b0_0000_0001};
         // Power on OUTPD
@@ -264,7 +275,16 @@ module top(
     reg [31:0] bram_addr;
     wire [31:0] bram_addr_shift;
     reg [31:0] bram_data;
-    assign i2s_dacdat = bram_data[31];
+
+    assign spi_cs = 1'b1;
+    assign spi_dq0 = 1'b0;
+    assign spi_dq2 = 1'b0;
+    assign spi_dq3 = 1'b0;
+    assign spi_sck = 1'b0;
+
+    // bypass or from bram
+    assign i2s_dacdat = switches[0] ? i2s_adcdat : bram_data[31];
+
     // byte-addressed
     assign bram_addr_shift = {bram_addr[31:2], 2'b0};
     assign bram_addra = bram_addr_shift;
