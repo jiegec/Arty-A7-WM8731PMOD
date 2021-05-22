@@ -117,6 +117,33 @@ module top(
         i2c_assignments[8] = {I2C_ADDRESS, 7'b0000110, 9'b0_0110_0000};
     end
 
+    /***************************************************************************
+        Quartus may show Truncating Warning using code above, use below instead
+
+        parameter bit [23:0] i2c_assignments [0:NUM_I2C_ASSIGNMENTS-1] = '{
+            // Reset device
+            {I2C_ADDRESS, 7'b0001111, 9'b0_0000_0000},
+            // Power on required bits except OUTPD
+            {I2C_ADDRESS, 7'b0000110, 9'b0_0111_0000},
+            // Disable mic mute and bypass, select mic input and dac, disable mic boost
+            {I2C_ADDRESS, 7'b0000100, 9'b0_0001_0100},
+            // Disable mute for left and right line in with default volume
+            {I2C_ADDRESS, 7'b0000000, 9'b1_0001_0111},
+            // Disable soft mute for dac
+            {I2C_ADDRESS, 7'b0000101, 9'b0_0000_0000},
+            // Set device to slave, Data Bit Length to 24, audio format to I2S, MSB-first left-1 justified
+            {I2C_ADDRESS, 7'b0000111, 9'b0_0000_1010},
+            // Set Sampling to 96kHz
+            {I2C_ADDRESS, 7'b0001000, 9'b0_0001_1100},
+            // Set headphone out to 0dB
+            {I2C_ADDRESS, 7'b0000010, 9'b1_1111_1001},
+            // Activate interface
+            {I2C_ADDRESS, 7'b0001001, 9'b0_0000_0001},
+            // Power on OUTPD
+            {I2C_ADDRESS, 7'b0000110, 9'b0_0110_0000}
+        };
+    ***************************************************************************/
+
     reg [7:0] i2c_assignment_index;
     // bit index in assignment(23 downto 0)
     reg [7:0] i2c_bit_index;
@@ -242,6 +269,9 @@ module top(
     // delay sda by one cycle to avoid timing issue
     assign i2c_sda_o = i2c_sda_reg_delay;
     assign i2c_sda_t = i2c_sda_t_reg;
+
+    // For Quartus
+    // assign io_sda = i2c_sda_t ? 1'bZ : i2c_sda_o
 
     reg [15:0] i2s_lrclk_counter;
     reg i2s_lrclk_reg;
