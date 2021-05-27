@@ -3,6 +3,7 @@ module top(
     // sample rate fs = 48kHz
     // clk = 6*256*fs = 73.728MHz
     input wire clk,
+    // reset with polarity low: low means reset asserted
     input wire rstn,
 
     // uart
