@@ -119,7 +119,9 @@ module top(
     end
 
     /***************************************************************************
-        Quartus may show Truncating Warning using code above, use below instead
+        Quartus may miscompile the initialization code above
+       	Use code below instead
+	And rename this file to .sv before importing to project
 
         parameter bit [23:0] i2c_assignments [0:NUM_I2C_ASSIGNMENTS-1] = '{
             // Reset device
