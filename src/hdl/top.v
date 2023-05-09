@@ -169,6 +169,7 @@ module top(
         i2c_scl_counter = 8'b0;
         i2c_scl_reg = 1'b1;
         i2c_sda_reg = 1'b1;
+        i2c_sda_reg_delay = 1'b1;
         i2c_sda_t_reg = 1'b0;
         i2c_state = I2C_STATE_RESET;
         i2c_prev_state = I2C_STATE_RESET;
