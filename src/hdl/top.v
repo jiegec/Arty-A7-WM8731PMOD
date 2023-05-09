@@ -126,23 +126,23 @@ module top(
         parameter bit [23:0] i2c_assignments [0:NUM_I2C_ASSIGNMENTS-1] = '{
 		// Power up sequence at Page 61
 		// Reset device
-		i2c_assignments[0] = {I2C_ADDRESS, 7'b0001111, 9'b0_0000_0000};
+		{I2C_ADDRESS, 7'b0001111, 9'b0_0000_0000},
 		// Power on required bits except OUTPD
-		i2c_assignments[1] = {I2C_ADDRESS, 7'b0000110, 9'b0_0111_0000};
+		{I2C_ADDRESS, 7'b0000110, 9'b0_0111_0000},
 		// Disable mic mute and bypass, select mic input and dac, enable mic boost
-		i2c_assignments[2] = {I2C_ADDRESS, 7'b0000100, 9'b0_0001_0101};
+		{I2C_ADDRESS, 7'b0000100, 9'b0_0001_0101},
 		// Disable mute for left and right line in with default volume
-		i2c_assignments[3] = {I2C_ADDRESS, 7'b0000001, 9'b1_0001_0111};
+		{I2C_ADDRESS, 7'b0000001, 9'b1_0001_0111},
 		// Disable soft mute for dac
-		i2c_assignments[4] = {I2C_ADDRESS, 7'b0000101, 9'b0_0000_0000};
+		{I2C_ADDRESS, 7'b0000101, 9'b0_0000_0000},
 		// Set audio format to MSB-first, left justified
-		i2c_assignments[5] = {I2C_ADDRESS, 7'b0000111, 9'b0_0000_1001};
+		{I2C_ADDRESS, 7'b0000111, 9'b0_0000_1001},
 		// Set headphone out to -20dB
-		i2c_assignments[6] = {I2C_ADDRESS, 7'b0000010, 9'b1_1110_0101};
+		{I2C_ADDRESS, 7'b0000010, 9'b1_1110_0101},
 		// Activate interface
-		i2c_assignments[7] = {I2C_ADDRESS, 7'b0001001, 9'b0_0000_0001};
+		{I2C_ADDRESS, 7'b0001001, 9'b0_0000_0001},
 		// Power on OUTPD
-		i2c_assignments[8] = {I2C_ADDRESS, 7'b0000110, 9'b0_0110_0000};
+		{I2C_ADDRESS, 7'b0000110, 9'b0_0110_0000}
         };
     ***************************************************************************/
 
